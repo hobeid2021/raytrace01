@@ -170,6 +170,7 @@ typedef enum {
 	LIGHT_POINT,
 	LIGHT_DIRECTIONAL,
 } LIGHT_T;
+
 typedef struct {
 	LIGHT_T type;
 	float intensity;
@@ -234,25 +235,20 @@ float ComputeLighting(light lights[LIGHT_NUM], sphere spheres[SPHERE_NUM], vec3 
 			}
 
 			// Specular
-			//printf("%f\n", specular);
 			if (specular != -1) {
 				// Specularity involves the reflection of light and the difference of that angle between the viewpoint you get me
 				// V is equal to Negative of D (pointing to the camera)
-				//vec3 Reflect = Sub(MultScalar(Normal, 2.0 * Dot(Normal, L)), L);
 				vec3 Reflect = ReflectRay(L, Normal);
-				//PrintVector(V);
 				float R_dot_V = Dot(Reflect, V);
 				if (R_dot_V > 0) {
 					float x = light->intensity * pow(R_dot_V/(Mag(Reflect)*mag_v), specular);
 					if (x > 0) {
 						intensity += light->intensity * pow(R_dot_V/(Mag(Reflect)*mag_v), specular);
 					}
-					//printf("%f\n",intensity);
 				}
 			}
 		}
 	}
-	//printf("%f\n", intensity);
 	return intensity;
 }
 
@@ -268,7 +264,6 @@ color TraceRay(color default_bg, vec3 Origin, vec3 D, sphere spheres[SPHERE_NUM]
 		Normal = MultScalar(Normal, 1./Mag(Normal));
 		// Get local color
 		color localColor = ColorMult(closest_sphere->color, ComputeLighting(lights, spheres, intersection_point, Normal, MultScalar(D, -1.0), closest_sphere->specular));
-		//printf("%f %f %f\n", traceColor.r, traceColor.g, traceColor.b);
 		// If we hit recursion limit or the object is not reflective, we're done
 		float reflect = closest_sphere->reflective;
 		if (recursion_depth <= 0 || reflect <= 0) {
@@ -305,14 +300,6 @@ int main() {
 			PutPixel(x, y, C, img);
 		}
 	}
-	/*
-	color c = default_bg;
-	for (int x = -IMG_W/2; x < IMG_W/2; ++x) {
-		for (int y = -IMG_H/2; y < IMG_H/2; ++y) {
-			putPixel(x,y,c,img);
-		}
-	}
-	*/
 	// Output image data to file
 	FILE *o_img;
 	o_img = fopen(IMG_NAME, "wb");
